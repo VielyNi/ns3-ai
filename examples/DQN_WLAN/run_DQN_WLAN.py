@@ -81,7 +81,7 @@ if args.duration:
 
 # res_list = ['ssThresh_l', 'cWnd_l', 'segmentsAcked_l',
 #             'segmentSize_l', 'bytesInFlight_l']
-res_list = ['MCS', 'Distance', 'Throughput']
+res_list = ['MCS', 'Distance', 'Throughput', 'Throughput_']
 if args.result:
     for res in res_list:
         globals()[res] = []
@@ -89,7 +89,7 @@ if args.result:
 stepIdx = 0
 
 ns3Settings = {
-    'transport_prot': 'TcpRlTimeBased',
+    'transport_prot': 'DQNWLANTimeBased',
     'duration': my_duration,
     'simSeed': my_sim_seed}
 env = gym.make("ns3ai_gym_env/Ns3-v0", targetName="ns3ai_DQNWLAN_gym",
@@ -128,7 +128,7 @@ try:
         #the put last time
         Throughput_ = obs[7]
 
-        cur_obs = [MCS, Distance, Throughput,Throughput_]
+        cur_obs = [MCS, Distance, Throughput, Throughput_]
         if args.show_log:
             print("Recv obs:", cur_obs)
 
