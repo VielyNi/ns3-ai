@@ -109,19 +109,24 @@ try:
 
     while True:
         # current ssThreshold
-        ssThresh = obs[4]
-        # current contention window size
-        cWnd = obs[5]
-        # segment size
-        segmentSize = obs[6]
-        # number of acked segments
-        segmentsAcked = obs[9]
-        # estimated bytes in flight
-        bytesInFlight = obs[7]
+        # ssThresh = obs[4]
+        # # current contention window size
+        # cWnd = obs[5]
+        # # segment size
+        # segmentSize = obs[6]
+        # # number of acked segments
+        # segmentsAcked = obs[9]
+        # # estimated bytes in flight
+        # bytesInFlight = obs[7]
 
-        MCS = 0
-        Distance = 0
-        Throughput = 0
+        #MCS
+        MCS = obs[4]
+        #the distance
+        Distance = obs[5]
+        #the put this time
+        Throughput = obs[6]
+        #the put last time
+        Throughput_ = obs[7]
 
         cur_obs = [MCS, Distance, Throughput,Throughput_]
         if args.show_log:
