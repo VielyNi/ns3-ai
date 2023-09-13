@@ -30,10 +30,10 @@ import traceback
 
 
 def get_agent(socketUuid, useRl):
-    agent = get_agent.tcpAgents.get(socketUuid)
+    agent = get_agent.WLANAgents.get(socketUuid)
     if agent is None:
         agent = WLANDeepQAgent()
-        get_agent.tcpAgents[socketUuid] = agent
+        get_agent.WLANAgents[socketUuid] = agent
     return agent
 
 
@@ -52,7 +52,7 @@ parser.add_argument('--show_log', action='store_true',
 parser.add_argument('--result', action='store_true',
                     help='whether output figures')
 parser.add_argument('--result_dir', type=str,
-                    default='./rl_tcp_results', help='output figures path')
+                    default='./DQN_WLAN_results', help='output figures path')
 # parser.add_argument('--use_rl', action='store_true',
 #                     help='whether use rl algorithm')
 # parser.add_argument('--rl_algo', type=str,
@@ -123,7 +123,7 @@ try:
         Distance = 0
         Throughput = 0
 
-        cur_obs = [MCS, Distance, Throughput]
+        cur_obs = [MCS, Distance, Throughput,Throughput_]
         if args.show_log:
             print("Recv obs:", cur_obs)
 

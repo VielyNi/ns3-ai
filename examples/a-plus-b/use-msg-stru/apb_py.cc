@@ -33,7 +33,9 @@ PYBIND11_MODULE(ns3ai_apb_py_stru, m)
         .def_readwrite("a", &EnvStruct::env_a)
         .def_readwrite("b", &EnvStruct::env_b);
 
-    py::class_<ActStruct>(m, "PyActStruct").def(py::init<>()).def_readwrite("c", &ActStruct::act_c);
+    py::class_<ActStruct>(m, "PyActStruct")
+        .def(py::init<>())
+        .def_readwrite("c", &ActStruct::act_c);
 
     py::class_<ns3::Ns3AiMsgInterfaceImpl<EnvStruct, ActStruct>>(m, "Ns3AiMsgInterfaceImpl")
         .def(py::init<bool,

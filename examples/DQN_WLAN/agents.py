@@ -27,8 +27,8 @@ class net(nn.Module):
         super(net, self).__init__()
         self.layers = nn.Sequential(
             nn.Linear(18, 126),
-            nn.ReLU(),
-            nn.Linear(126, 126),
+            # nn.ReLU(),
+            # nn.Linear(126, 126),
             nn.ReLU(),
             nn.Linear(126, 3),
         )
@@ -43,11 +43,11 @@ class DQN(object):
         self.target_net = net()
         self.learn_step = 0
         self.batchsize = 32
-        self.observer_shape = 3
+        self.observer_shape = 4
         self.target_replace = 100
         self.memory_counter = 0
         self.memory_capacity = 2000
-        self.memory = np.zeros((2000, 2 * 3 + 2))  # s, a, r, s'
+        self.memory = np.zeros((2000, 2 * 4 + 2))  # s, a, r, s'
         self.epsilon = 1
         self.optimizer = torch.optim.Adam(
             self.eval_net.parameters(), lr=0.0001)
@@ -95,47 +95,54 @@ class WLANDeepQAgent:
 
     def __init__(self):
         self.dqn = DQN()
-        self.new_cWnd = None
-        self.new_ssThresh = None
+        # self.new_cWnd = None
+        # self.new_ssThresh = None
         self.s = None   # state
         self.a = None   # action
         self.r = None   # reward
         self.s_ = None  # next state
 
     def get_action(self, obs, reward, done, info):
-        # current ssThreshold
-        ssThresh = obs[4]
-        # current contention window size
-        cWnd = obs[5]
-        # segment size
-        segmentSize = obs[6]
-        # number of acked segments
-        segmentsAcked = obs[9]
-        # estimated bytes in flight
-        bytesInFlight = obs[7]
+        # # current ssThreshold
+        # ssThresh = obs[4]
+        # # current contention window size
+        # cWnd = obs[5]
+        # # segment size
+        # segmentSize = obs[6]
+        # # number of acked segments
+        # segmentsAcked = obs[9]
+        # # estimated bytes in flight
+        # bytesInFlight = obs[7]
+
+        MCS = obs[4]
+        Distance = obs[5]
+        Throughput = obs[6]
+        Throughput_ = obs[7]#the put last time
 
         # update DQN
         self.s = self.s_
-        self.s_ = [ssThresh, cWnd, segmentsAcked, segmentSize, bytesInFlight]
+        # self.s_ = [ssThresh, cWnd, segmentsAcked, segmentSize, bytesInFlight]
+        self.s_ = [MCS, Distance, Throughput, Throughput_]
         if self.s is not None:  # not first time
-            self.r = segmentsAcked - bytesInFlight - cWnd
+            self.r = Throughput - Throughput_
             self.dqn.store_transition(self.s, self.a, self.r, self.s_)
             if self.dqn.memory_counter > self.dqn.memory_capacity:
                 self.dqn.learn()
 
         # choose action
         self.a = self.dqn.choose_action(self.s_)
-        if self.a & 1:
-            self.new_cWnd = cWnd + segmentSize
-        else:
-            if cWnd > 0:
-                self.new_cWnd = cWnd + int(max(1, (segmentSize * segmentSize) / cWnd))
-        if self.a < 3:
-            self.new_ssThresh = 2 * segmentSize
-        else:
-            self.new_ssThresh = int(bytesInFlight / 2)
 
-        return [self.new_ssThresh, self.new_cWnd]
+        # if self.a & 1:
+        #     self.new_cWnd = cWnd + segmentSize
+        # else:
+        #     if cWnd > 0:
+        #         self.new_cWnd = cWnd + int(max(1, (segmentSize * segmentSize) / cWnd))
+        # if self.a < 3:
+        #     self.new_ssThresh = 2 * segmentSize
+        # else:
+        #     self.new_ssThresh = int(bytesInFlight / 2)
+
+        return self.a
 
 
 # class TcpQAgent:
