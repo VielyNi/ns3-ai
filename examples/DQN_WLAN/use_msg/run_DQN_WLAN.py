@@ -22,23 +22,14 @@ import torch
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from agents import WLANDeepQAgent
-import ns3ai_gym_env
-import gymnasium as gym
+from agents import DeepQAgent
 import sys
 import traceback
-
-
-def get_agent(socketUuid, useRl):
-    agent = get_agent.WLANAgents.get(socketUuid)
-    if agent is None:
-        agent = WLANDeepQAgent()
-        get_agent.WLANAgents[socketUuid] = agent
-    return agent
+import ns3ai_DQNWLAN_msg_py as py_binding
+from ns3ai_utils import Experiment
 
 
 # initialize variable
-get_agent.WLANAgents = {}
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int,
@@ -89,68 +80,51 @@ if args.result:
 stepIdx = 0
 
 ns3Settings = {
-    'transport_prot': 'DQNWLANTimeBased',
+    'apManager': 'DQN',
     'duration': my_duration,
     'simSeed': my_sim_seed}
-env = gym.make("ns3ai_gym_env/Ns3-v0", targetName="ns3ai_DQNWLAN_gym",
-               ns3Path="../../../../../", ns3Settings=ns3Settings)
-ob_space = env.observation_space
-ac_space = env.action_space
-print("Observation space: ", ob_space, ob_space.dtype)
-print("Action space: ", ac_space, ac_space.dtype)
+exp = Experiment("ns3ai_rltcp_msg", "../../../../../", py_binding, handleFinish=True)
+msgInterface = exp.run(setting=ns3Settings, show_output=True)
 
 try:
-    obs, info = env.reset()
-    reward = 0
-    done = False
-
-    # get existing agent or create new TCP agent if needed
-    WLANAgent = get_agent(obs[0], args.use_rl)
-
+    reward = -100
+    DeepQAgent
     while True:
-        # current ssThreshold
-        # ssThresh = obs[4]
-        # # current contention window size
-        # cWnd = obs[5]
-        # # segment size
-        # segmentSize = obs[6]
-        # # number of acked segments
-        # segmentsAcked = obs[9]
-        # # estimated bytes in flight
-        # bytesInFlight = obs[7]
-
+        # receive observation from C++
+        msgInterface.PyRecvBegin()
+        if msgInterface.PyGetFinished():
+            print("Simulation ended")
+            break
         #MCS
-        MCS = obs[4]
+        MCS  = msgInterface.GetCpp2PyStruct().MCS
         #the distance
-        Distance = obs[5]
+        Distance = msgInterface.GetCpp2PyStruct().Distance
         #the put this time
-        Throughput = obs[6]
+        Throughput = msgInterface.GetCpp2PyStruct().Throughput
         #the put last time
-        Throughput_ = obs[7]
+        Throughput_ = msgInterface.GetCpp2PyStruct().Throughput_
+        msgInterface.PyRecvEnd()
 
-        cur_obs = [MCS, Distance, Throughput, Throughput_]
+        obs = [MCS, Distance, Throughput, Throughput_]
         if args.show_log:
-            print("Recv obs:", cur_obs)
+            print("Recv obs:", obs)
 
         if args.result:
             for res in res_list:
-                globals()[res].append(globals()[res[:-2]])
+                globals()[res].append(globals()[res])
 
-        action = WLANAgent.get_action(obs, reward, done, info)
+        act = DeepQAgent.get_action(obs)
+        new_MCS = (MCS + act) % 9
+
+        # send action to C++
+        msgInterface.PySendBegin()
+        msgInterface.GetPy2CppStruct().new_MCS = new_MCS
+        msgInterface.PySendEnd()
 
         if args.show_log:
             print("Step:", stepIdx)
             stepIdx += 1
-            print("Send act:", action)
-
-        obs, reward, done, _, info = env.step(action)
-
-        if done:
-            print("Simulation ended")
-            break
-
-        # get existing agent of create new TCP agent if needed
-        WLANAgent = get_agent(obs[0], args.use_rl)
+            print("Send act:", act)
 
 except Exception as e:
     exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -175,4 +149,4 @@ else:
 
 finally:
     print("Finally exiting...")
-    env.close()
+    del exp

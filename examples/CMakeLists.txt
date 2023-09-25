@@ -1,5 +1,5 @@
 add_subdirectory(a-plus-b)
-add_subdirectory(rate-control)
+add_subdirectory(test_for_DQN)
 add_subdirectory(rl-tcp)
 add_subdirectory(lte-cqi)
 add_subdirectory(multi-bss)

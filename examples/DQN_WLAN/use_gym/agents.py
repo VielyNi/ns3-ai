@@ -44,7 +44,7 @@ class DQN(object):
         self.learn_step = 0
         self.batchsize = 32
         self.observer_shape = 4
-        self.target_replace = 100
+        self.target_replace = 10
         self.memory_counter = 0
         self.memory_capacity = 2000
         self.memory = np.zeros((2000, 2 * 4 + 2))  # s, a, r, s'
@@ -59,7 +59,7 @@ class DQN(object):
             action = self.eval_net.forward(x)
             action = torch.argmax(action, 0).numpy()
         else:  # explore
-            action = np.random.randint(0, 2)
+            action = np.random.randint(0, 2)-1
         self.epsilon -= 0.02
         return action
 
@@ -91,7 +91,7 @@ class DQN(object):
         loss.backward()
         self.optimizer.step()
 
-class WLANDeepQAgent:
+class DeepQAgent:
 
     def __init__(self):
         self.dqn = DQN()
