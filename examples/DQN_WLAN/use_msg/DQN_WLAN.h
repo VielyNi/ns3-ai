@@ -16,20 +16,20 @@ struct RateStats
     uint16_t channelWidth;
     uint16_t guardInterval;
     uint64_t dataRate;
-    double success;
-    double fails;
-    double lastDecay;
+//    double success;
+//    double fails;
+//    double lastDecay;
 
     RateStats()
         : nss(0),
           channelWidth(0),
           guardInterval(0),
-          dataRate(0),
-          success(0),
-          fails(0),
-          lastDecay(0)
-    {
-    }
+          dataRate(0){}
+//          success(0),
+//          fails(0),
+//          lastDecay(0)
+
+
 };
 
 struct DQNWLANEnv{
@@ -38,7 +38,7 @@ struct DQNWLANEnv{
     u_int8_t Distance;
     double Throughput;
     double Throughput_;
-    RateStats stats;
+    std::array<RateStats, 64> stats;
     int8_t managerId;
     int8_t stationId;
 };

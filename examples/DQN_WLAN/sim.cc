@@ -218,10 +218,10 @@ main(int argc, char* argv[])
     CommandLine cmd(__FILE__);
 //    cmd.AddValue("staManager", "Rate adaptation manager of the STA", staManager);
     cmd.AddValue("apManager", "Rate adaptation manager of the AP, MinstrelHt or DQN", apManager);
-    cmd.AddValue("standard", "Wifi standard (a/b/g/n/ac only)", standard);
-    cmd.AddValue("shortGuardInterval",
-                 "Enable Short Guard Interval in all stations",
-                 shortGuardInterval);
+//    cmd.AddValue("standard", "Wifi standard (a/b/g/n/ac only)", standard);
+//    cmd.AddValue("shortGuardInterval",
+//                 "Enable Short Guard Interval in all stations",
+//                 shortGuardInterval);
     cmd.AddValue("channelWidth", "Channel width of all the stations", chWidth);
     cmd.AddValue("rtsThreshold", "RTS threshold", rtsThreshold);
     cmd.AddValue("BeMaxAmpduSize", "BE Mac A-MPDU size", BeMaxAmpduSize);
