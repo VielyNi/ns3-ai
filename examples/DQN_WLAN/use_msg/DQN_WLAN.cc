@@ -24,6 +24,7 @@ struct AiRateStats
     WifiMode mode;         ///< MCS
     uint16_t channelWidth; ///< channel width in MHz
     uint8_t nss;           ///< Number of spatial streams
+//    uint8_t mcs;
 };
 
 /**
@@ -34,8 +35,8 @@ struct AiRateStats
  */
 struct DQNWifiRemoteStation : public WifiRemoteStation
 {
-    int8_t m_ns3ai_station_id;
     std::vector<AiRateStats> m_mcsStats; //!< Collected statistics
+
 };
 
 TypeId
@@ -61,21 +62,21 @@ DQNWifiManager::GetTypeId()
 DQNWifiManager::DQNWifiManager()
     : m_currentRate{0}
 {
-    NS_LOG_FUNCTION(this);
-    auto interface = Ns3AiMsgInterface::Get();
-    interface->SetIsMemoryCreator(false);
-    interface->SetUseVector(false);
-    interface->SetHandleFinish(true);
-    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
-        interface->GetInterface<DQNWLANEnv, DQNWLANAct>();
-
-    msgInterface->CppSendBegin();
-    msgInterface->GetCpp2PyStruct()->type = 0x01;
-    msgInterface->CppSendEnd();
-
-    msgInterface->CppRecvBegin();
-    m_ns3ai_manager_id = msgInterface->GetPy2CppStruct()->managerId;
-    msgInterface->CppRecvEnd();
+//    NS_LOG_FUNCTION(this);
+//    auto interface = Ns3AiMsgInterface::Get();
+//    interface->SetIsMemoryCreator(false);
+//    interface->SetUseVector(false);
+//    interface->SetHandleFinish(true);
+//    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
+//        interface->GetInterface<DQNWLANEnv, DQNWLANAct>();
+//
+//    msgInterface->CppSendBegin();
+//    msgInterface->GetCpp2PyStruct()->type = 0x01;
+//    msgInterface->CppSendEnd();
+//
+//    msgInterface->CppRecvBegin();
+//    m_ns3ai_manager_id = msgInterface->GetPy2CppStruct()->managerId;
+//    msgInterface->CppRecvEnd();
 }
 
 DQNWifiManager::~DQNWifiManager()
@@ -88,17 +89,17 @@ DQNWifiManager::DoCreateStation() const
 {
     NS_LOG_FUNCTION(this);
     DQNWifiRemoteStation* station = new DQNWifiRemoteStation();
-    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
-        Ns3AiMsgInterface::Get()
-            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
-
-    msgInterface->CppSendBegin();
-    msgInterface->GetCpp2PyStruct()->type = 0x02;
-    msgInterface->CppSendEnd();
-
-    msgInterface->CppRecvBegin();
-    station->m_ns3ai_station_id = msgInterface->GetPy2CppStruct()->stationId;
-    msgInterface->CppRecvEnd();
+//    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
+//        Ns3AiMsgInterface::Get()
+//            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
+//
+//    msgInterface->CppSendBegin();
+//    msgInterface->GetCpp2PyStruct()->type = 0x02;
+//    msgInterface->CppSendEnd();
+//
+//    msgInterface->CppRecvBegin();
+//    station->m_ns3ai_station_id = msgInterface->GetPy2CppStruct()->stationId;
+//    msgInterface->CppRecvEnd();
 
     return station;
 }
@@ -132,11 +133,12 @@ DQNWifiManager::InitializeStation(WifiRemoteStation* st) const
 //                {
                     if (mode.IsAllowed(j, 1))
                     {
-                        AiRateStats stats;
-                        stats.mode = mode;
-                        stats.channelWidth = j;
-                        stats.nss = 1;
-                        station->m_mcsStats.push_back(stats);
+                        AiRateStats init_stats;
+                        init_stats.mode = mode;
+                        init_stats.channelWidth = j;
+                        init_stats.nss = 1;
+//                        init_stats.mcs = station->m_mcsStats.size();
+                        station->m_mcsStats.push_back(init_stats);
                     }
 //                }
             }
@@ -166,35 +168,35 @@ DQNWifiManager::InitializeStation(WifiRemoteStation* st) const
 
     NS_ASSERT_MSG(!station->m_mcsStats.empty(), "No usable MCS found");
 
-    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
-        Ns3AiMsgInterface::Get()
-            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
+//    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
+//        Ns3AiMsgInterface::Get()
+//            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
 
-    msgInterface->CppSendBegin();
-    msgInterface->GetCpp2PyStruct()->type = 0x03;
-    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
-    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
+//    msgInterface->CppSendBegin();
+//    msgInterface->GetCpp2PyStruct()->type = 0x03;
+//    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
+//    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
 
-    NS_ASSERT_MSG(station->m_mcsStats.size() <= 64, "m_mcsStats too long");
+    NS_ASSERT_MSG(station->m_mcsStats.size() <= 9, "m_mcsStats too long");
 
-    auto& s = msgInterface->GetCpp2PyStruct()->stats;
-    for (size_t i = 0; i < station->m_mcsStats.size(); i++)
-    {
-        const WifiMode mode{station->m_mcsStats.at(i).mode};
-        s.at(i).nss = station->m_mcsStats.at(i).nss;
-        s.at(i).channelWidth = station->m_mcsStats.at(i).channelWidth;
-        s.at(i).guardInterval = GetModeGuardInterval(st, mode);
-        s.at(i).dataRate =
-            mode.GetDataRate(s.at(i).channelWidth, s.at(i).guardInterval, s.at(i).nss);
-    }
+//    auto& s = msgInterface->GetCpp2PyStruct()->stats;
+//    for (size_t i = 0; i < station->m_mcsStats.size(); i++)
+//    {
+//        const WifiMode mode{station->m_mcsStats.at(i).mode};
+//        s.at(i).nss = station->m_mcsStats.at(i).nss;
+//        s.at(i).channelWidth = station->m_mcsStats.at(i).channelWidth;
+//        s.at(i).guardInterval = GetModeGuardInterval(st, mode);
+//        s.at(i).dataRate =
+//            mode.GetDataRate(s.at(i).channelWidth, s.at(i).guardInterval, s.at(i).nss);
+//    }
 //    s[station->m_mcsStats.size()].lastDecay = -1.0;
-    msgInterface->CppSendEnd();
+//    msgInterface->CppSendEnd();
 
-    msgInterface->CppRecvBegin();
-    NS_ASSERT_MSG(msgInterface->GetPy2CppStruct()->stationId ==
-                      msgInterface->GetCpp2PyStruct()->stationId,
-                  "Error 0x03");
-    msgInterface->CppRecvEnd();
+//    msgInterface->CppRecvBegin();
+//    NS_ASSERT_MSG(msgInterface->GetPy2CppStruct()->stationId ==
+//                      msgInterface->GetCpp2PyStruct()->stationId,
+//                  "Error 0x03");
+//    msgInterface->CppRecvEnd();
 
     UpdateNextMode(st);
 }
@@ -218,24 +220,24 @@ DQNWifiManager::DoReportDataFailed(WifiRemoteStation* st)
 {
     NS_LOG_FUNCTION(this << st);
     InitializeStation(st);
-    auto station = static_cast<DQNWifiRemoteStation*>(st);
-    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
-        Ns3AiMsgInterface::Get()
-            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
+//    auto station = static_cast<DQNWifiRemoteStation*>(st);
+//    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
+//        Ns3AiMsgInterface::Get()
+//            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
 
-    msgInterface->CppSendBegin();
-    msgInterface->GetCpp2PyStruct()->type = 0x05;
-    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
-    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
+//    msgInterface->CppSendBegin();
+//    msgInterface->GetCpp2PyStruct()->type = 0x05;
+//    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
+//    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
 //    msgInterface->GetCpp2PyStruct()->data.decay.decay = m_decay;
 //    msgInterface->GetCpp2PyStruct()->data.decay.now = Simulator::Now().GetSeconds();
-    msgInterface->CppSendEnd();
-
-    msgInterface->CppRecvBegin();
-    NS_ASSERT_MSG(msgInterface->GetPy2CppStruct()->stationId ==
-                      msgInterface->GetCpp2PyStruct()->stationId,
-                  "Error 0x05");
-    msgInterface->CppRecvEnd();
+//    msgInterface->CppSendEnd();
+//
+//    msgInterface->CppRecvBegin();
+//    NS_ASSERT_MSG(msgInterface->GetPy2CppStruct()->stationId ==
+//                      msgInterface->GetCpp2PyStruct()->stationId,
+//                  "Error 0x05");
+//    msgInterface->CppRecvEnd();
 }
 
 void
@@ -253,23 +255,23 @@ DQNWifiManager::UpdateNextMode(WifiRemoteStation* st) const
     InitializeStation(st);
     auto station = static_cast<DQNWifiRemoteStation*>(st);
     NS_ASSERT(!station->m_mcsStats.empty());
-    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
-        Ns3AiMsgInterface::Get()
-            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
-
-    msgInterface->CppSendBegin();
-    msgInterface->GetCpp2PyStruct()->type = 0x0a;
-    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
-    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
-//    msgInterface->GetCpp2PyStruct()->data.decay.decay = m_decay;
-//    msgInterface->GetCpp2PyStruct()->data.decay.now = Simulator::Now().GetSeconds();
-    msgInterface->CppSendEnd();
-
-    msgInterface->CppRecvBegin();
-    NS_ASSERT_MSG(msgInterface->GetPy2CppStruct()->stationId ==
-                      msgInterface->GetCpp2PyStruct()->stationId,
-                  "Error 0x0a");
-    msgInterface->CppRecvEnd();
+//    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
+//        Ns3AiMsgInterface::Get()
+//            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
+//
+//    msgInterface->CppSendBegin();
+//    msgInterface->GetCpp2PyStruct()->type = 0x0a;
+//    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
+//    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
+////    msgInterface->GetCpp2PyStruct()->data.decay.decay = m_decay;
+////    msgInterface->GetCpp2PyStruct()->data.decay.now = Simulator::Now().GetSeconds();
+//    msgInterface->CppSendEnd();
+//
+//    msgInterface->CppRecvBegin();
+//    NS_ASSERT_MSG(msgInterface->GetPy2CppStruct()->stationId ==
+//                      msgInterface->GetCpp2PyStruct()->stationId,
+//                  "Error 0x0a");
+//    msgInterface->CppRecvEnd();
 }
 
 void
@@ -282,24 +284,24 @@ DQNWifiManager::DoReportDataOk(WifiRemoteStation* st,
 {
     NS_LOG_FUNCTION(this << st << ackSnr << ackMode.GetUniqueName() << dataSnr);
     InitializeStation(st);
-    auto station = static_cast<DQNWifiRemoteStation*>(st);
-    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
-        Ns3AiMsgInterface::Get()
-            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
+//    auto station = static_cast<DQNWifiRemoteStation*>(st);
+//    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
+//        Ns3AiMsgInterface::Get()
+//            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
 
-    msgInterface->CppSendBegin();
-    msgInterface->GetCpp2PyStruct()->type = 0x06;
-    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
-    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
+//    msgInterface->CppSendBegin();
+//    msgInterface->GetCpp2PyStruct()->type = 0x06;
+//    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
+//    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
 //    msgInterface->GetCpp2PyStruct()->data.decay.decay = m_decay;
 //    msgInterface->GetCpp2PyStruct()->data.decay.now = Simulator::Now().GetSeconds();
-    msgInterface->CppSendEnd();
-
-    msgInterface->CppRecvBegin();
-    NS_ASSERT_MSG(msgInterface->GetPy2CppStruct()->stationId ==
-                      msgInterface->GetCpp2PyStruct()->stationId,
-                  "Error 0x06");
-    msgInterface->CppRecvEnd();
+//    msgInterface->CppSendEnd();
+//
+//    msgInterface->CppRecvBegin();
+//    NS_ASSERT_MSG(msgInterface->GetPy2CppStruct()->stationId ==
+//                      msgInterface->GetCpp2PyStruct()->stationId,
+//                  "Error 0x06");
+//    msgInterface->CppRecvEnd();
 }
 
 void
@@ -313,25 +315,25 @@ DQNWifiManager::DoReportAmpduTxStatus(WifiRemoteStation* st,
 {
     NS_LOG_FUNCTION(this << st << nSuccessfulMpdus << nFailedMpdus << rxSnr << dataSnr);
     InitializeStation(st);
-    auto station = static_cast<DQNWifiRemoteStation*>(st);
-    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
-        Ns3AiMsgInterface::Get()
-            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
-
-    msgInterface->CppSendBegin();
-    msgInterface->GetCpp2PyStruct()->type = 0x07;
-    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
-    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
+//    auto station = static_cast<DQNWifiRemoteStation*>(st);
+//    Ns3AiMsgInterfaceImpl<DQNWLANEnv, DQNWLANAct>* msgInterface =
+//        Ns3AiMsgInterface::Get()
+//            ->GetInterface<DQNWLANEnv, DQNWLANAct>();
+//
+//    msgInterface->CppSendBegin();
+//    msgInterface->GetCpp2PyStruct()->type = 0x07;
+//    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
+//    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
 //    msgInterface->GetCpp2PyStruct()->var = (uint64_t)nSuccessfulMpdus << 32 | nFailedMpdus;
 //    msgInterface->GetCpp2PyStruct()->data.decay.decay = m_decay;
 //    msgInterface->GetCpp2PyStruct()->data.decay.now = Simulator::Now().GetSeconds();
-    msgInterface->CppSendEnd();
-
-    msgInterface->CppRecvBegin();
-    NS_ASSERT_MSG(msgInterface->GetPy2CppStruct()->stationId ==
-                      msgInterface->GetCpp2PyStruct()->stationId,
-                  "Error 0x07");
-    msgInterface->CppRecvEnd();
+//    msgInterface->CppSendEnd();
+//
+//    msgInterface->CppRecvBegin();
+//    NS_ASSERT_MSG(msgInterface->GetPy2CppStruct()->stationId ==
+//                      msgInterface->GetCpp2PyStruct()->stationId,
+//                  "Error 0x07");
+//    msgInterface->CppRecvEnd();
 }
 
 void
@@ -378,17 +380,22 @@ DQNWifiManager::DoGetDataTxVector(WifiRemoteStation* st, uint16_t allowedWidth)
             ->GetInterface<DQNWLANEnv, DQNWLANAct>();
 
     msgInterface->CppSendBegin();
-    msgInterface->GetCpp2PyStruct()->type = 0x08;
-    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
-    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
+    msgInterface->GetCpp2PyStruct()->MCS = MCS;
+    msgInterface->GetCpp2PyStruct()->Distance = 0x08;
+    msgInterface->GetCpp2PyStruct()->Throughput = station->m_mcsStats.at(MCS).mode.
+                                                  GetDataRate(station->m_mcsStats.at(MCS).channelWidth,
+                                                              800,
+                                                              station->m_mcsStats.at(MCS).nss);
+//    msgInterface->GetCpp2PyStruct()->Throughput_ = Throughput;
     msgInterface->CppSendEnd();
 
     msgInterface->CppRecvBegin();
     WifiMode mode = station->m_mcsStats.at(msgInterface->GetPy2CppStruct()->new_MCS).mode;
-    uint8_t nss = msgInterface->GetPy2CppStruct()->stats.nss;
+    uint8_t nss = station->m_mcsStats.at(msgInterface->GetPy2CppStruct()->new_MCS).nss;//msgInterface->GetPy2CppStruct()->stats.nss;
     uint16_t channelWidth =
-        std::min(msgInterface->GetPy2CppStruct()->stats.channelWidth, GetPhy()->GetChannelWidth());
-    uint16_t guardInterval = msgInterface->GetPy2CppStruct()->stats.guardInterval;
+        std::min(station->m_mcsStats.at(msgInterface->GetPy2CppStruct()->new_MCS).channelWidth, GetPhy()->GetChannelWidth());
+    uint16_t guardInterval = 800;
+    MCS = msgInterface->GetPy2CppStruct()->new_MCS;
     msgInterface->CppRecvEnd();
 
     uint64_t rate = mode.GetDataRate(channelWidth, guardInterval, nss);
@@ -422,17 +429,26 @@ DQNWifiManager::DoGetRtsTxVector(WifiRemoteStation* st)
             ->GetInterface<DQNWLANEnv, DQNWLANAct>();
 
     msgInterface->CppSendBegin();
-    msgInterface->GetCpp2PyStruct()->type = 0x09;
-    msgInterface->GetCpp2PyStruct()->managerId = m_ns3ai_manager_id;
-    msgInterface->GetCpp2PyStruct()->stationId = station->m_ns3ai_station_id;
+    msgInterface->GetCpp2PyStruct()->MCS = MCS;
+    msgInterface->GetCpp2PyStruct()->Distance = 0x08;
+    msgInterface->GetCpp2PyStruct()->Throughput = station->m_mcsStats.at(MCS).mode.
+                                                  GetDataRate(station->m_mcsStats.at(MCS).channelWidth,
+                                                              800,
+                                                              station->m_mcsStats.at(MCS).nss);
+//    msgInterface->GetCpp2PyStruct()->Throughput_ = Throughput;
     msgInterface->CppSendEnd();
 
     msgInterface->CppRecvBegin();
     WifiMode mode = station->m_mcsStats.at(msgInterface->GetPy2CppStruct()->new_MCS).mode;
-    uint8_t nss = msgInterface->GetPy2CppStruct()->stats.nss;
+    uint8_t nss = station->m_mcsStats.at(msgInterface->GetPy2CppStruct()->new_MCS).nss;//msgInterface->GetPy2CppStruct()->stats.nss;
     uint16_t channelWidth =
-        std::min(msgInterface->GetPy2CppStruct()->stats.channelWidth, GetPhy()->GetChannelWidth());
-    uint16_t guardInterval = msgInterface->GetPy2CppStruct()->stats.guardInterval;
+        std::min(station->m_mcsStats.at(msgInterface->GetPy2CppStruct()->new_MCS).channelWidth, GetPhy()->GetChannelWidth());
+    uint16_t guardInterval = 800;
+    MCS = msgInterface->GetPy2CppStruct()->new_MCS;
+//    uint8_t nss = msgInterface->GetPy2CppStruct()->stats.nss;
+//    uint16_t channelWidth =
+//        std::min(msgInterface->GetPy2CppStruct()->stats.channelWidth, GetPhy()->GetChannelWidth());
+//    uint16_t guardInterval = msgInterface->GetPy2CppStruct()->stats.guardInterval;
     msgInterface->CppRecvEnd();
 
     // Make sure control frames are sent using 1 spatial stream.

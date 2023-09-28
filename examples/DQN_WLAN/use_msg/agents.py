@@ -41,11 +41,11 @@ class DQN(object):
         self.target_net = net()
         self.learn_step = 0
         self.batchsize = 32
-        self.observer_shape = 4
+        self.observer_shape = 3
         self.target_replace = 30
         self.memory_counter = 0
         self.memory_capacity = 2000
-        self.memory = np.zeros((2000, 2 * 4 + 2))  # s, a, r, s'
+        self.memory = np.zeros((2000, 2 * 3 + 2))  # s, a, r, s'
         self.epsilon = 1
         self.optimizer = torch.optim.Adam(
             self.eval_net.parameters(), lr=0.0001)
@@ -93,8 +93,7 @@ class DeepQAgent:
 
     def __init__(self):
         self.dqn = DQN()
-        # self.new_cWnd = None
-        # self.new_ssThresh = None
+        self.Throughput = 0#datarate last time
         self.s = None   # state
         self.a = None   # action
         self.r = -100   # reward
@@ -105,11 +104,12 @@ class DeepQAgent:
         MCS = obs[0]
         Distance = obs[1]
         Throughput = obs[2]
-        Throughput_ = obs[3]#the put last time
+        Throughput_ = self.Throughput#the put last time
+        self.Throughput = Throughput
 
         # update DQN
         self.s = self.s_
-        self.s_ = [MCS, Distance, Throughput, Throughput_]
+        self.s_ = [MCS, Distance, Throughput]
         if self.s is not None:  # not first time
             self.r = Throughput - Throughput_
             self.dqn.store_transition(self.s, self.a, self.r, self.s_)

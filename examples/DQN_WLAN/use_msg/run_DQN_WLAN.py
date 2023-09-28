@@ -83,12 +83,12 @@ ns3Settings = {
     'apManager': 'DQN',
     'duration': my_duration,
     'simSeed': my_sim_seed}
-exp = Experiment("ns3ai_rltcp_msg", "../../../../../", py_binding, handleFinish=True)
+exp = Experiment("ns3ai_DQN_WLAN_msg", "../../../../../", py_binding, handleFinish=True)
 msgInterface = exp.run(setting=ns3Settings, show_output=True)
 
 try:
-    reward = -100
-    DeepQAgent
+
+    DeepQAgent()
     while True:
         # receive observation from C++
         msgInterface.PyRecvBegin()
@@ -102,10 +102,10 @@ try:
         #the put this time
         Throughput = msgInterface.GetCpp2PyStruct().Throughput
         #the put last time
-        Throughput_ = msgInterface.GetCpp2PyStruct().Throughput_
+        # Throughput_ = msgInterface.GetCpp2PyStruct().Throughput_
         msgInterface.PyRecvEnd()
 
-        obs = [MCS, Distance, Throughput, Throughput_]
+        obs = [MCS, Distance, Throughput]
         if args.show_log:
             print("Recv obs:", obs)
 

@@ -33,22 +33,16 @@ struct RateStats
 };
 
 struct DQNWLANEnv{
-    int8_t  type;
     int8_t MCS;
     u_int8_t Distance;
     double Throughput;
-    double Throughput_;
-    std::array<RateStats, 64> stats;
-    int8_t managerId;
-    int8_t stationId;
+//    double Throughput_;
+
+
 };
 
 struct DQNWLANAct{
-    int8_t  type;
     int8_t new_MCS;
-    RateStats stats;
-    int8_t managerId;
-    int8_t stationId;
 };
 
 
@@ -118,8 +112,10 @@ class DQNWifiManager: public WifiRemoteStationManager{
 
     TracedValue<uint64_t> m_currentRate; //!< Trace rate changes
 
-    int8_t m_ns3ai_manager_id;
-
+    uint8_t MCS = 0;
+    u_int8_t Distance = 0;
+    uint8_t Throughput = 0;
+    std::array<RateStats, 64> stats;
 };
 
 };

@@ -27,16 +27,28 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(ns3ai_DQNWLAN_msg_py, m)
 {
+    py::class_<ns3::RateStats>(m, "DQNWLANRateStats")
+        .def(py::init<>())
+        .def_readwrite("nss", &ns3::RateStats::nss)
+        .def_readwrite("channelWidth", &ns3::RateStats::channelWidth)
+        .def_readwrite("guardInterval", &ns3::RateStats::guardInterval)
+        .def_readwrite("dataRate", &ns3::RateStats::dataRate)
+        .def("__copy__", [](const ns3::RateStats& self) {
+            return ns3::RateStats(self);
+        });
+
     py::class_<ns3::DQNWLANEnv>(m, "PyEnvStruct")
         .def(py::init<>())
         .def_readwrite("MCS", &ns3::DQNWLANEnv::MCS)
         .def_readwrite("Distance", &ns3::DQNWLANEnv::Distance)
         .def_readwrite("Throughput", &ns3::DQNWLANEnv::Throughput)
-        .def_readwrite("Throughput_", &ns3::DQNWLANEnv::Throughput_)
+//        .def_readwrite("Throughput_", &ns3::DQNWLANEnv::Throughput_)
+
 
     py::class_<ns3::DQNWLANAct>(m, "PyActStruct")
         .def(py::init<>())
         .def_readwrite("new_MCS", &ns3::DQNWLANAct::new_MCS)
+
 
     py::class_<ns3::Ns3AiMsgInterfaceImpl<ns3::DQNWLANEnv, ns3::DQNWLANAct>>(m, "Ns3AiMsgInterfaceImpl")
         .def(py::init<bool,
