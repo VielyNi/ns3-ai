@@ -72,7 +72,7 @@ if args.duration:
 
 # res_list = ['ssThresh_l', 'cWnd_l', 'segmentsAcked_l',
 #             'segmentSize_l', 'bytesInFlight_l']
-res_list = ['MCS', 'Distance', 'Throughput', 'Throughput_']
+res_list = ['MCS', 'Distance', 'Throughput']
 if args.result:
     for res in res_list:
         globals()[res] = []
@@ -96,7 +96,7 @@ try:
             print("Simulation ended")
             break
         #MCS
-        MCS  = msgInterface.GetCpp2PyStruct().MCS
+        MCS = msgInterface.GetCpp2PyStruct().MCS
         #the distance
         Distance = msgInterface.GetCpp2PyStruct().Distance
         #the put this time

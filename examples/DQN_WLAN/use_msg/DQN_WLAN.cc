@@ -43,16 +43,16 @@ TypeId
 DQNWifiManager::GetTypeId()
 {
     static TypeId tid =
-        TypeId("ns3::AiThompsonSamplingWifiManager")
+        TypeId("ns3::DQNWifiManager")
             .SetParent<WifiRemoteStationManager>()
             .SetGroupName("Wifi")
             .AddConstructor<DQNWifiManager>()
-//            .AddAttribute(
-//                "Decay",
-//                "Exponential decay coefficient, Hz; zero is a valid value for static scenarios",
-//                DoubleValue(1.0),
-//                MakeDoubleAccessor(&DQNWifiManager::m_decay),
-//                MakeDoubleChecker<double>(0.0))
+            .AddAttribute(
+                "Distance",
+                "Distance between ap and sta",
+                DoubleValue(0.0),
+                MakeDoubleAccessor(&DQNWifiManager::Distance),
+                MakeDoubleChecker<double>(0.0))
             .AddTraceSource("Rate",
                             "Traced value for rate changes (b/s)",
                             MakeTraceSourceAccessor(&DQNWifiManager::m_currentRate),
@@ -365,7 +365,7 @@ DQNWifiManager::GetModeGuardInterval(WifiRemoteStation* st, WifiMode mode) const
 //    {
 //        return 800;
 //    }
-        //because I only use 802.11ac
+        //because I only use 802.11ac with guard interval 0.8us
         return 800;
 }
 
@@ -381,7 +381,7 @@ DQNWifiManager::DoGetDataTxVector(WifiRemoteStation* st, uint16_t allowedWidth)
 
     msgInterface->CppSendBegin();
     msgInterface->GetCpp2PyStruct()->MCS = MCS;
-    msgInterface->GetCpp2PyStruct()->Distance = 0x08;
+    msgInterface->GetCpp2PyStruct()->Distance = Distance;
     msgInterface->GetCpp2PyStruct()->Throughput = station->m_mcsStats.at(MCS).mode.
                                                   GetDataRate(station->m_mcsStats.at(MCS).channelWidth,
                                                               800,
@@ -430,7 +430,7 @@ DQNWifiManager::DoGetRtsTxVector(WifiRemoteStation* st)
 
     msgInterface->CppSendBegin();
     msgInterface->GetCpp2PyStruct()->MCS = MCS;
-    msgInterface->GetCpp2PyStruct()->Distance = 0x08;
+    msgInterface->GetCpp2PyStruct()->Distance = Distance;
     msgInterface->GetCpp2PyStruct()->Throughput = station->m_mcsStats.at(MCS).mode.
                                                   GetDataRate(station->m_mcsStats.at(MCS).channelWidth,
                                                               800,
@@ -442,7 +442,8 @@ DQNWifiManager::DoGetRtsTxVector(WifiRemoteStation* st)
     WifiMode mode = station->m_mcsStats.at(msgInterface->GetPy2CppStruct()->new_MCS).mode;
     uint8_t nss = station->m_mcsStats.at(msgInterface->GetPy2CppStruct()->new_MCS).nss;//msgInterface->GetPy2CppStruct()->stats.nss;
     uint16_t channelWidth =
-        std::min(station->m_mcsStats.at(msgInterface->GetPy2CppStruct()->new_MCS).channelWidth, GetPhy()->GetChannelWidth());
+        std::min(station->m_mcsStats.at(msgInterface->GetPy2CppStruct()->new_MCS).channelWidth,
+                 GetPhy()->GetChannelWidth());
     uint16_t guardInterval = 800;
     MCS = msgInterface->GetPy2CppStruct()->new_MCS;
 //    uint8_t nss = msgInterface->GetPy2CppStruct()->stats.nss;

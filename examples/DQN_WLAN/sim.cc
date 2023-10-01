@@ -114,12 +114,25 @@ class NodeStatistics
      */
     void SetPosition(Ptr<Node> node, Vector position);
     /**
+    *send distance to ns3-ai interface
+    * \param aps
+    * \param stas
+     * \param apManager a string of ap manager
+     */
+    void SendDistance(NetDeviceContainer aps, NetDeviceContainer stas, std::string apManager);
+
+    /**
     * Advance node position
     * \param node the node
     * \param stepsSize the size of a step
     * \param stepsTime the time interval between steps
+     * \param aps
+     * \param stas
+     * \param apmanager
      */
-    void AdvancePosition(Ptr<Node> node, int stepsSize, int stepsTime);
+
+    void AdvancePosition(Ptr<Node> node, int stepsSize, int stepsTime,
+                         NetDeviceContainer aps, NetDeviceContainer stas, std::string apmanager);
     /**
     * Get node position
     * \param node the node
@@ -161,8 +174,17 @@ NodeStatistics::GetPosition(Ptr<Node> node)
     return mobility->GetPosition();
 }
 
+void NodeStatistics::SendDistance(NetDeviceContainer aps, NetDeviceContainer stas, std::string apManager){
+    auto distance = aps.Get(0)->GetNode()->GetObject<MobilityModel>()->GetDistanceFrom(
+        stas.Get(0)->GetNode()->GetObject<MobilityModel>());
+    Config::Set("/NodeList/0/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/$" + apManager + "/Distance",
+                DoubleValue(distance));
+}
+
+
 void
-NodeStatistics::AdvancePosition(Ptr<Node> node, int stepsSize, int stepsTime)
+NodeStatistics::AdvancePosition(Ptr<Node> node, int stepsSize, int stepsTime,
+                                NetDeviceContainer aps, NetDeviceContainer stas, std::string apmanager)
 {
     Vector pos = GetPosition(node);
     double mbs = ((m_bytesTotal * 8.0) / (1000000 * stepsTime));
@@ -170,12 +192,16 @@ NodeStatistics::AdvancePosition(Ptr<Node> node, int stepsSize, int stepsTime)
     m_output.Add(pos.x, mbs);
     pos.x += stepsSize;
     SetPosition(node, pos);
+    SendDistance(aps, stas, apmanager);
     Simulator::Schedule(Seconds(stepsTime),
                         &NodeStatistics::AdvancePosition,
                         this,
                         node,
                         stepsSize,
-                        stepsTime);
+                        stepsTime,
+                        aps,
+                        stas,
+                        apmanager);
 }
 
 Gnuplot2dDataset
@@ -375,7 +401,10 @@ main(int argc, char* argv[])
                         &atpCounter,
                         wifiStaNodes.Get(0),
                         stepsSize,
-                        stepsTime);
+                        stepsTime,
+                        wifiApDevices,
+                        wifiStaDevices,
+                        apManager);
 
     // Configure the IP stack
     InternetStackHelper stack;

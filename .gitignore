@@ -1,6 +1,7 @@
 
 .vscode
 build
+test_for_DQN
 __pycache__
 # Prerequisites
 *.d
