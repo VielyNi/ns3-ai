@@ -227,7 +227,7 @@ main(int argc, char* argv[])
 {
     uint32_t rtsThreshold = 65535;//Disable RTS/CTS
     std::string staManager = "ns3::MinstrelHtWifiManager";
-    std::string apManager = "MinstrelHt";
+    std::string apManager = "DQN";
     std::string standard = "802.11ac";
     std::string outputFileName = "DQNWLAN";
     uint32_t BeMaxAmpduSize = 65535;

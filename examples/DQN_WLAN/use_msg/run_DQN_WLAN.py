@@ -21,6 +21,7 @@ import os
 import torch
 import argparse
 import numpy as np
+import string
 import matplotlib.pyplot as plt
 from agents import DeepQAgent
 import sys
@@ -32,12 +33,24 @@ from ns3ai_utils import Experiment
 # initialize variable
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--seed', type=int,
-                    help='set seed for reproducibility')
-parser.add_argument('--sim_seed', type=int,
-                    help='set simulation run number')
-parser.add_argument('--duration', type=float,
-                    help='set simulation duration (seconds)')
+parser.add_argument('--apManager', type=string,
+                    help='Rate adaptation manager of the AP, MinstrelHt or DQN')
+parser.add_argument('--steps', type=int,
+                    help='How many different distances to try')
+parser.add_argument('--stepsTime', type=int,
+                    help='Time on each step')
+parser.add_argument('--stepsSize', type=int,
+                    help='Distance between steps')
+
+parser.add_argument('--AP1_x', type=int,
+                    help='Position of AP1 in x coordinate')
+parser.add_argument('--AP1_y', type=int,
+                    help='Position of AP1 in y coordinate')
+parser.add_argument('--STA1_x', type=int,
+                    help='Position of STA1 in x coordinate')
+parser.add_argument('--STA1_y', type=int,
+                    help='Position of STA1 in y coordinate')
+
 parser.add_argument('--show_log', action='store_true',
                     help='whether show observation and action')
 parser.add_argument('--result', action='store_true',
@@ -80,9 +93,7 @@ if args.result:
 stepIdx = 0
 
 ns3Settings = {
-    'apManager': 'DQN',
-    'duration': my_duration,
-    'simSeed': my_sim_seed}
+    'apManager': 'DQN'}
 exp = Experiment("ns3ai_DQN_WLAN_msg", "../../../../../", py_binding, handleFinish=True)
 msgInterface = exp.run(setting=ns3Settings, show_output=True)
 

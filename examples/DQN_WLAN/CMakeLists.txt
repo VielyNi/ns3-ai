@@ -33,7 +33,7 @@ build_lib_example(
         ${libcsma}
         ${libinternet}
         ${libwifi}
-        ${libflow-monitor}
+
 )
 
 pybind11_add_module(ns3ai_DQN_msg_py use_msg/run_DQN_WLAN_py.cc)
