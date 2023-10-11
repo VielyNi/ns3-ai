@@ -26,7 +26,7 @@ class net(nn.Module):
     def __init__(self):
         super(net, self).__init__()
         self.layers = nn.Sequential(
-            nn.Linear(18, 126),
+            nn.Linear(3, 126),
             nn.ReLU(),
             nn.Linear(126, 3),
         )
@@ -73,16 +73,19 @@ class DQN(object):
         sample_list = np.random.choice(self.memory_capacity, self.batchsize)
         # choose a mini batch
         sample = self.memory[sample_list, :]
+        # print(sample)
         s = torch.Tensor(sample[:, :self.observer_shape])
         a = torch.LongTensor(
             sample[:, self.observer_shape:self.observer_shape + 1])
         r = torch.Tensor(
             sample[:, self.observer_shape + 1:self.observer_shape + 2])
         s_ = torch.Tensor(sample[:, self.observer_shape + 2:])
+        # print(self.eval_net(s))
         q_eval = self.eval_net(s).gather(1, a)
         q_next = self.target_net(s_).detach()
         q_target = r + 0.9 * q_next.max(1, True)[0].data
-
+        # print(r)
+        # print(q_target)
         loss = self.loss_func(q_eval, q_target)
 
         self.optimizer.zero_grad()
@@ -99,13 +102,15 @@ class DeepQAgent:
         self.r = -100   # reward
         self.s_ = None  # next state
 
-    def get_action(self, obs, reward, done, info):
+    def get_action(self, obs):
 
+        print(obs)
         MCS = obs[0]
         Distance = obs[1]
         Throughput = obs[2]
         Throughput_ = self.Throughput#the put last time
         self.Throughput = Throughput
+        # print(Throughput_)
 
         # update DQN
         self.s = self.s_
@@ -118,6 +123,7 @@ class DeepQAgent:
 
         # choose action
         self.a = self.dqn.choose_action(self.s_)
+        # print(self.a)
         return self.a
 
 

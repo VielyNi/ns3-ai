@@ -113,8 +113,7 @@ class DQNWifiManager: public WifiRemoteStationManager{
     TracedValue<uint64_t> m_currentRate; //!< Trace rate changes
 
     uint8_t MCS = 0;
-    u_int8_t Distance = 0;
-    uint8_t Throughput = 0;
+    double Distance = 0;
     std::array<RateStats, 64> stats;
 };
 

@@ -25,7 +25,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(ns3ai_DQNWLAN_msg_py, m)
+PYBIND11_MODULE(ns3ai_DQN_msg_py, m)
 {
     py::class_<ns3::RateStats>(m, "DQNWLANRateStats")
         .def(py::init<>())

@@ -52,7 +52,7 @@ DQNWifiManager::GetTypeId()
                 "Distance between ap and sta",
                 DoubleValue(0.0),
                 MakeDoubleAccessor(&DQNWifiManager::Distance),
-                MakeDoubleChecker<double>(0.0))
+                MakeDoubleChecker<double>(-2000))
             .AddTraceSource("Rate",
                             "Traced value for rate changes (b/s)",
                             MakeTraceSourceAccessor(&DQNWifiManager::m_currentRate),
@@ -381,11 +381,12 @@ DQNWifiManager::DoGetDataTxVector(WifiRemoteStation* st, uint16_t allowedWidth)
 
     msgInterface->CppSendBegin();
     msgInterface->GetCpp2PyStruct()->MCS = MCS;
+    printf("Manager:%f\n",Distance);
     msgInterface->GetCpp2PyStruct()->Distance = Distance;
     msgInterface->GetCpp2PyStruct()->Throughput = station->m_mcsStats.at(MCS).mode.
                                                   GetDataRate(station->m_mcsStats.at(MCS).channelWidth,
                                                               800,
-                                                              station->m_mcsStats.at(MCS).nss);
+                                                              station->m_mcsStats.at(MCS).nss)/100000;
 //    msgInterface->GetCpp2PyStruct()->Throughput_ = Throughput;
     msgInterface->CppSendEnd();
 
@@ -430,11 +431,12 @@ DQNWifiManager::DoGetRtsTxVector(WifiRemoteStation* st)
 
     msgInterface->CppSendBegin();
     msgInterface->GetCpp2PyStruct()->MCS = MCS;
+    printf("Manager:%f\n",Distance);
     msgInterface->GetCpp2PyStruct()->Distance = Distance;
     msgInterface->GetCpp2PyStruct()->Throughput = station->m_mcsStats.at(MCS).mode.
                                                   GetDataRate(station->m_mcsStats.at(MCS).channelWidth,
                                                               800,
-                                                              station->m_mcsStats.at(MCS).nss);
+                                                              station->m_mcsStats.at(MCS).nss)/100000;
 //    msgInterface->GetCpp2PyStruct()->Throughput_ = Throughput;
     msgInterface->CppSendEnd();
 

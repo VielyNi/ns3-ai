@@ -26,15 +26,15 @@ import matplotlib.pyplot as plt
 from agents import DeepQAgent
 import sys
 import traceback
-import ns3ai_DQNWLAN_msg_py as py_binding
+import ns3ai_DQN_msg_py as py_binding
 from ns3ai_utils import Experiment
 
 
 # initialize variable
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--apManager', type=string,
-                    help='Rate adaptation manager of the AP, MinstrelHt or DQN')
+# parser.add_argument('--apManager', type=string,
+#                     help='Rate adaptation manager of the AP, MinstrelHt or DQN')
 parser.add_argument('--steps', type=int,
                     help='How many different distances to try')
 parser.add_argument('--stepsTime', type=int,
@@ -63,20 +63,20 @@ parser.add_argument('--result_dir', type=str,
 #                     default='DeepQ', help='RL Algorithm, Q or DeepQ')
 
 args = parser.parse_args()
-my_seed = 42
-if args.seed is not None:
-    my_seed = args.seed
-print("Python side random seed {}".format(my_seed))
-np.random.seed(my_seed)
-torch.manual_seed(my_seed)
+# my_seed = 42
+# if args.seed is not None:
+#     my_seed = args.seed
+# print("Python side random seed {}".format(my_seed))
+# np.random.seed(my_seed)
+# torch.manual_seed(my_seed)
 
-my_sim_seed = 0
-if args.sim_seed:
-    my_sim_seed = args.sim_seed
-
-my_duration = 1000
-if args.duration:
-    my_duration = args.duration
+# my_sim_seed = 0
+# if args.sim_seed:
+#     my_sim_seed = args.sim_seed
+#
+# my_duration = 1000
+# if args.duration:
+#     my_duration = args.duration
 
 # if args.use_rl:
 #     if (args.rl_algo != 'Q') and (args.rl_algo != 'DeepQ'):
@@ -94,12 +94,12 @@ stepIdx = 0
 
 ns3Settings = {
     'apManager': 'DQN'}
-exp = Experiment("ns3ai_DQN_WLAN_msg", "../../../../../", py_binding, handleFinish=True)
+exp = Experiment("ns3ai_DQN_msg", "../../../../../", py_binding, handleFinish=True)
 msgInterface = exp.run(setting=ns3Settings, show_output=True)
 
 try:
 
-    DeepQAgent()
+    Agent = DeepQAgent()
     while True:
         # receive observation from C++
         msgInterface.PyRecvBegin()
@@ -119,12 +119,12 @@ try:
         obs = [MCS, Distance, Throughput]
         if args.show_log:
             print("Recv obs:", obs)
-
+        print("Recv obs:", obs)
         if args.result:
             for res in res_list:
                 globals()[res].append(globals()[res])
 
-        act = DeepQAgent.get_action(obs)
+        act = Agent.get_action(obs)
         new_MCS = (MCS + act) % 9
 
         # send action to C++
