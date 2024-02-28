@@ -381,7 +381,7 @@ DQNWifiManager::DoGetDataTxVector(WifiRemoteStation* st, uint16_t allowedWidth)
 
     msgInterface->CppSendBegin();
     msgInterface->GetCpp2PyStruct()->MCS = MCS;
-    printf("Manager:%f\n",Distance);
+//    printf("Manager:%f\n",Distance);
     msgInterface->GetCpp2PyStruct()->Distance = Distance;
     msgInterface->GetCpp2PyStruct()->Throughput = station->m_mcsStats.at(MCS).mode.
                                                   GetDataRate(station->m_mcsStats.at(MCS).channelWidth,
@@ -431,7 +431,7 @@ DQNWifiManager::DoGetRtsTxVector(WifiRemoteStation* st)
 
     msgInterface->CppSendBegin();
     msgInterface->GetCpp2PyStruct()->MCS = MCS;
-    printf("Manager:%f\n",Distance);
+//    printf("Manager:%f\n",Distance);
     msgInterface->GetCpp2PyStruct()->Distance = Distance;
     msgInterface->GetCpp2PyStruct()->Throughput = station->m_mcsStats.at(MCS).mode.
                                                   GetDataRate(station->m_mcsStats.at(MCS).channelWidth,

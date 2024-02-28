@@ -44,8 +44,8 @@ class DQN(object):
         self.observer_shape = 3
         self.target_replace = 30
         self.memory_counter = 0
-        self.memory_capacity = 2000
-        self.memory = np.zeros((2000, 2 * 3 + 2))  # s, a, r, s'
+        self.memory_capacity = 200000
+        self.memory = np.zeros((200000, 2 * 3 + 2))  # s, a, r, s'
         self.epsilon = 1
         self.optimizer = torch.optim.Adam(
             self.eval_net.parameters(), lr=0.0001)
@@ -63,6 +63,8 @@ class DQN(object):
 
     def store_transition(self, s, a, r, s_):
         index = self.memory_counter % self.memory_capacity
+        if index % 200 == 0:
+            print('index: %d', index)
         self.memory[index, :] = np.hstack((s, [a, r], s_))
         self.memory_counter += 1
 
@@ -104,12 +106,14 @@ class DeepQAgent:
 
     def get_action(self, obs):
 
-        print(obs)
+        # print(obs)
         MCS = obs[0]
         Distance = obs[1]
         Throughput = obs[2]
         Throughput_ = self.Throughput#the put last time
         self.Throughput = Throughput
+        # if(Distance % 20 == 0):
+        #     print('running: %d', Distance)
         # print(Throughput_)
 
         # update DQN

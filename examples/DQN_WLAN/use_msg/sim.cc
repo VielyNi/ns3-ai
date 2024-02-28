@@ -179,8 +179,8 @@ void NodeStatistics::SendDistance(NetDeviceContainer aps, NetDeviceContainer sta
         stas.Get(0)->GetNode()->GetObject<MobilityModel>());
 //    aps.Get(0)->GetNode()->GetDevice(0)->SetAttributeFailSafe("Distance", DoubleValue(distance));
 //    printf("%f\n", distance);
-//    Config::Set("/NodeList/0/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/$" + apManager + "/Distance",
-//                DoubleValue(distance));
+    Config::Set("/NodeList/0/DeviceList/*/$ns3::WifiNetDevice/RemoteStationManager/$" + apManager + "/Distance",
+                DoubleValue(distance));
 }
 
 
@@ -237,7 +237,7 @@ main(int argc, char* argv[])
     uint32_t chWidth = 20;
     int ap1_x = 0;
     int ap1_y = 0;
-    int sta1_x = 2000;
+    int sta1_x = 20;
     int sta1_y = 0;
     int steps = 100;
     int stepsSize = 1;

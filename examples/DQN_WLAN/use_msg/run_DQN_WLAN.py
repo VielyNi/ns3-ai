@@ -119,7 +119,7 @@ try:
         obs = [MCS, Distance, Throughput]
         if args.show_log:
             print("Recv obs:", obs)
-        print("Recv obs:", obs)
+
         if args.result:
             for res in res_list:
                 globals()[res].append(globals()[res])
