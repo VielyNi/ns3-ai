@@ -63,8 +63,8 @@ class DQN(object):
 
     def store_transition(self, s, a, r, s_):
         index = self.memory_counter % self.memory_capacity
-        if index % 200 == 0:
-            print('index: %d', index)
+        # if index % 200 == 0:
+        #     print('index: %d', index)
         self.memory[index, :] = np.hstack((s, [a, r], s_))
         self.memory_counter += 1
 

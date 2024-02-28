@@ -36,9 +36,6 @@ struct DQNWLANEnv{
     int8_t MCS;
     u_int8_t Distance;
     double Throughput;
-//    double Throughput_;
-
-
 };
 
 struct DQNWLANAct{

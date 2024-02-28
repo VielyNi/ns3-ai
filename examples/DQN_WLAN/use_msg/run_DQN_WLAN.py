@@ -33,8 +33,7 @@ from ns3ai_utils import Experiment
 # initialize variable
 
 parser = argparse.ArgumentParser()
-# parser.add_argument('--apManager', type=string,
-#                     help='Rate adaptation manager of the AP, MinstrelHt or DQN')
+
 parser.add_argument('--steps', type=int,
                     help='How many different distances to try')
 parser.add_argument('--stepsTime', type=int,
@@ -57,34 +56,9 @@ parser.add_argument('--result', action='store_true',
                     help='whether output figures')
 parser.add_argument('--result_dir', type=str,
                     default='./DQN_WLAN_results', help='output figures path')
-# parser.add_argument('--use_rl', action='store_true',
-#                     help='whether use rl algorithm')
-# parser.add_argument('--rl_algo', type=str,
-#                     default='DeepQ', help='RL Algorithm, Q or DeepQ')
 
 args = parser.parse_args()
-# my_seed = 42
-# if args.seed is not None:
-#     my_seed = args.seed
-# print("Python side random seed {}".format(my_seed))
-# np.random.seed(my_seed)
-# torch.manual_seed(my_seed)
 
-# my_sim_seed = 0
-# if args.sim_seed:
-#     my_sim_seed = args.sim_seed
-#
-# my_duration = 1000
-# if args.duration:
-#     my_duration = args.duration
-
-# if args.use_rl:
-#     if (args.rl_algo != 'Q') and (args.rl_algo != 'DeepQ'):
-#         print("Invalid RL Algorithm {}".format(args.rl_algo))
-#         exit(1)
-
-# res_list = ['ssThresh_l', 'cWnd_l', 'segmentsAcked_l',
-#             'segmentSize_l', 'bytesInFlight_l']
 res_list = ['MCS', 'Distance', 'Throughput']
 if args.result:
     for res in res_list:
@@ -131,6 +105,8 @@ try:
         msgInterface.PySendBegin()
         msgInterface.GetPy2CppStruct().new_MCS = new_MCS
         msgInterface.PySendEnd()
+
+
 
         if args.show_log:
             print("Step:", stepIdx)
