@@ -26,7 +26,7 @@ class net(nn.Module):
     def __init__(self):
         super(net, self).__init__()
         self.layers = nn.Sequential(
-            nn.Linear(3, 126),
+            nn.Linear(18, 126),
             nn.ReLU(),
             nn.Linear(126, 3),
         )
@@ -57,7 +57,8 @@ class DQN(object):
             action = self.eval_net.forward(x)
             action = torch.argmax(action, 0).numpy()
         else:  # explore
-            action = np.random.randint(0, 2)-1
+            action = np.zeros(3,int)
+            action[np.random.randint(0, 2)] = 1
         self.epsilon -= 0.02
         return action
 
@@ -75,19 +76,33 @@ class DQN(object):
         sample_list = np.random.choice(self.memory_capacity, self.batchsize)
         # choose a mini batch
         sample = self.memory[sample_list, :]
-        # print(sample)
+
         s = torch.Tensor(sample[:, :self.observer_shape])
         a = torch.LongTensor(
             sample[:, self.observer_shape:self.observer_shape + 1])
         r = torch.Tensor(
             sample[:, self.observer_shape + 1:self.observer_shape + 2])
         s_ = torch.Tensor(sample[:, self.observer_shape + 2:])
-        # print(self.eval_net(s))
+
+        #one hot embedding
+        sMCS = np.zeros(9,int)
+        sMCS[int(s[0])] = 1
+        s_MCS = np.zeros(9,int)
+        s_MCS[int(s_[0])] = 1
+
+        sDistance = np.zeros(9,int)
+        sDistance[int(s[1]/12.5)] = 1
+        s_Distance = np.zeros(9,int)
+        s_Distance[int(s_[1]/12.5)] = 1
+
+        s =  np.concatenate((sMCS,sDistance),axis=0)
+        s_ = np.concatenate((s_MCS,s_Distance),axis=0)
+
         q_eval = self.eval_net(s).gather(1, a)
         q_next = self.target_net(s_).detach()
+
         q_target = r + 0.9 * q_next.max(1, True)[0].data
-        # print(r)
-        # print(q_target)
+
         loss = self.loss_func(q_eval, q_target)
 
         self.optimizer.zero_grad()
