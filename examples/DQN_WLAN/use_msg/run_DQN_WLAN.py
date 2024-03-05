@@ -98,8 +98,7 @@ try:
             for res in res_list:
                 globals()[res].append(globals()[res])
 
-        act = Agent.get_action(obs)
-        new_MCS = (MCS + act) % 9
+        new_MCS = Agent.get_action(obs)
 
         # send action to C++
         msgInterface.PySendBegin()

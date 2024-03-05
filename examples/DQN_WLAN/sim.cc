@@ -235,9 +235,9 @@ main(int argc, char* argv[])
     uint32_t chWidth = 20;
     int ap1_x = 0;
     int ap1_y = 0;
-    int sta1_x = 5;
+    int sta1_x = 0;
     int sta1_y = 0;
-    int steps = 100;
+    int steps = 80;
     int stepsSize = 1;
     int stepsTime = 1;
 

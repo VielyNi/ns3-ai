@@ -237,19 +237,15 @@ main(int argc, char* argv[])
     uint32_t chWidth = 20;
     int ap1_x = 0;
     int ap1_y = 0;
-    int sta1_x = 20;
+    int sta1_x = 0;
     int sta1_y = 0;
-    int steps = 100;
+    int steps = 40;
     int stepsSize = 1;
     int stepsTime = 1;
 
     CommandLine cmd(__FILE__);
-//    cmd.AddValue("staManager", "Rate adaptation manager of the STA", staManager);
+
     cmd.AddValue("apManager", "Rate adaptation manager of the AP, MinstrelHt or DQN", apManager);
-//    cmd.AddValue("standard", "Wifi standard (a/b/g/n/ac only)", standard);
-//    cmd.AddValue("shortGuardInterval",
-//                 "Enable Short Guard Interval in all stations",
-//                 shortGuardInterval);
     cmd.AddValue("channelWidth", "Channel width of all the stations", chWidth);
     cmd.AddValue("rtsThreshold", "RTS threshold", rtsThreshold);
     cmd.AddValue("BeMaxAmpduSize", "BE Mac A-MPDU size", BeMaxAmpduSize);

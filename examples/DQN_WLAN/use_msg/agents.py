@@ -28,7 +28,7 @@ class net(nn.Module):
         self.layers = nn.Sequential(
             nn.Linear(18, 126),
             nn.ReLU(),
-            nn.Linear(126, 3),
+            nn.Linear(126, 1),
         )
 
     def forward(self, x):
@@ -44,23 +44,36 @@ class DQN(object):
         self.observer_shape = 3
         self.target_replace = 30
         self.memory_counter = 0
-        self.memory_capacity = 200000
-        self.memory = np.zeros((200000, 2 * 3 + 2))  # s, a, r, s'
+        self.memory_capacity = 2000
+        self.memory = np.zeros((2000, 2 * 3 + 2))  # s, a, r, s'
         self.epsilon = 1
         self.optimizer = torch.optim.Adam(
             self.eval_net.parameters(), lr=0.0001)
         self.loss_func = nn.MSELoss()
 
     def choose_action(self, x):
-        x = torch.Tensor(x)
-        if np.random.uniform() > self.epsilon:  # choose best
-            action = self.eval_net.forward(x)
-            action = torch.argmax(action, 0).numpy()
+        # x = torch.Tensor(x)
+        if np.random.randint(0,1) > self.epsilon:  # choose best
+            #one hot
+            MCS = np.zeros(9)
+            MCS[x[0]] = 1
+            Dis = np.zeros(9)
+            Dis[int(x[1]/5)%9] = 1
+            s = np.concatenate((MCS,Dis),axis=0)
+            s = torch.Tensor(s)
+            # print(f"state:{s}")
+            
+            reward = self.eval_net.forward(s)
+            # print(f"reward:{reward}")
+            
+            action = torch.argmax(reward[:8])
+            # print(f"action:{action}")
+            
         else:  # explore
-            action = np.zeros(3,int)
-            action[np.random.randint(0, 2)] = 1
+            action = (int(x[0]) + np.random.randint(0, 2)- 1)%9
+            # print(f"explore: {action}")
         self.epsilon -= 0.02
-        return action
+        return action#MCS   
 
     def store_transition(self, s, a, r, s_):
         index = self.memory_counter % self.memory_capacity
@@ -75,7 +88,10 @@ class DQN(object):
             self.target_net.load_state_dict(self.eval_net.state_dict())
         sample_list = np.random.choice(self.memory_capacity, self.batchsize)
         # choose a mini batch
+        # print(f"sample list{sample_list}")
+        
         sample = self.memory[sample_list, :]
+        # print(f"sample{sample}")
 
         s = torch.Tensor(sample[:, :self.observer_shape])
         a = torch.LongTensor(
@@ -84,26 +100,41 @@ class DQN(object):
             sample[:, self.observer_shape + 1:self.observer_shape + 2])
         s_ = torch.Tensor(sample[:, self.observer_shape + 2:])
 
+        # print(f"s{s}")
         #one hot embedding
-        sMCS = np.zeros(9,int)
-        sMCS[int(s[0])] = 1
-        s_MCS = np.zeros(9,int)
-        s_MCS[int(s_[0])] = 1
+        sMCS = np.zeros((len(sample_list),9),int)
+        for i in range(len(sample_list)):
+            sMCS[i,int(s[i,0])] = 1
+            
+        s_MCS = np.zeros((len(sample_list),9),int)
+        for i in range(len(sample_list)):
+            s_MCS[i,int(s_[i,0])] = 1
+        # print(f"sMCS{sMCS}")
 
-        sDistance = np.zeros(9,int)
-        sDistance[int(s[1]/12.5)] = 1
-        s_Distance = np.zeros(9,int)
-        s_Distance[int(s_[1]/12.5)] = 1
+        sDistance = np.zeros((len(sample_list),9),int)
+        for i in range(len(sample_list)):
+            sDistance[i,int(s[i,1]/5)%9] = 1
+        s_Distance = np.zeros((len(sample_list),9),int)
+        for i in range(len(sample_list)):
+            s_Distance[i,int(s_[i,1]/5)%9] = 1
 
-        s =  np.concatenate((sMCS,sDistance),axis=0)
-        s_ = np.concatenate((s_MCS,s_Distance),axis=0)
+        state =  np.concatenate((sMCS,sDistance),axis=1)
+        state_ = np.concatenate((s_MCS,s_Distance),axis=1)
+        
+        state = torch.Tensor(state)
+        state_ = torch.Tensor(state_)
+        # print(f"state{state}")
+        
+        # print(f"sample state{state}")
+        
+        q_eval = self.eval_net(state)
+        q_next = self.target_net(state_).detach()
 
-        q_eval = self.eval_net(s).gather(1, a)
-        q_next = self.target_net(s_).detach()
-
-        q_target = r + 0.9 * q_next.max(1, True)[0].data
+        q_target = r + 0.9 * q_next
+        # print(f"q_tar: {q_target}")
 
         loss = self.loss_func(q_eval, q_target)
+        # print(f"loss: {loss}")
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -115,8 +146,8 @@ class DeepQAgent:
         self.dqn = DQN()
         self.Throughput = 0#datarate last time
         self.s = None   # state
-        self.a = None   # action
-        self.r = -100   # reward
+        self.a = None   # action  one int -1,0,1
+        self.r = -3200   # reward
         self.s_ = None  # next state
 
     def get_action(self, obs):
@@ -125,6 +156,7 @@ class DeepQAgent:
         MCS = obs[0]
         Distance = obs[1]
         Throughput = obs[2]
+        
         Throughput_ = self.Throughput#the put last time
         self.Throughput = Throughput
 
@@ -139,7 +171,7 @@ class DeepQAgent:
 
         # choose action
         self.a = self.dqn.choose_action(self.s_)
-        # print(self.a)
+        
         return self.a
-
+list
 
